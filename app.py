@@ -79,7 +79,7 @@ with open("css/style.css") as source_des:
             popup = folium.Popup(iframe, min_width=200, max_width=300)
             location = (usaha['latitude'], usaha['longitude'])
             folium.Marker(location, popup=popup).add_to(map)
-        st_folium(map, width=1000)
+        st_folium(map,  use_container_width=True)
 
 
 
