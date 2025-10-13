@@ -34,6 +34,7 @@ with open("css/style.css") as source_des:
         filter_desa = col2.selectbox("Desa",['SEMUA']+list(kode_wilayah[kode_wilayah['kecamatan']==filter_kecamatan]['desa']))
         if filter_desa != "SEMUA" :
             kode_desa = kode_wilayah[kode_wilayah['kecamatan']==filter_kecamatan][kode_wilayah['desa']==filter_desa]
+            search_query = col3.text_input("Cari Usaha", value="")
             # print(kode_desa.reset_index()['kode'][0])
             read_data = 1
             kddesa = kode_desa.reset_index()['kode'][0]
@@ -66,19 +67,33 @@ with open("css/style.css") as source_des:
         # col4.markdown(len(data_sbr_all))
 
     
+
         
         connecticute_center = (data_sbr_map.reset_index()['latitude'][5], data_sbr_map.reset_index()['longitude'][5])
 
         map = folium.Map(location=connecticute_center, zoom_start=15)
 
         folium.GeoJson(geojson_data).add_to(map)
+        
+        if search_query != "":
+            # data_sbr_search = data_sbr_map[data_sbr_map['nama_usaha'].str.contains(search_query)]
+            # print('text')
+            data_sbr_search = data_sbr_map[data_sbr_map['nama_usaha'].str.contains(search_query, case=False)]
+            # print(len(data_sbr_search))
+            if len(data_sbr_search) > 0 :
+                for index, usaha in data_sbr_search.iterrows():
 
-        for index, usaha in data_sbr_map.iterrows():
+                    iframe = folium.IFrame(usaha.loc['nama_usaha'].replace("<","(").replace(">",")"))
+                    popup = folium.Popup(iframe, min_width=200, max_width=300)
+                    location = (usaha['latitude'], usaha['longitude'])
+                    folium.Marker(location, popup=popup).add_to(map)
+        else:
+            for index, usaha in data_sbr_map.iterrows():
 
-            iframe = folium.IFrame(usaha.loc['nama_usaha'].replace("<","(").replace(">",")"))
-            popup = folium.Popup(iframe, min_width=200, max_width=300)
-            location = (usaha['latitude'], usaha['longitude'])
-            folium.Marker(location, popup=popup).add_to(map)
+                iframe = folium.IFrame(usaha.loc['nama_usaha'].replace("<","(").replace(">",")"))
+                popup = folium.Popup(iframe, min_width=200, max_width=300)
+                location = (usaha['latitude'], usaha['longitude'])
+                folium.Marker(location, popup=popup).add_to(map)
         st_folium(map,  use_container_width=True)
 
 
@@ -102,8 +117,14 @@ with open("css/style.css") as source_des:
                         """
 
         table_row = ""
+        
         i = 0
-        for idx in data_sbr_all.index:
+        if search_query != "":
+            data_sbr_table = data_sbr_all[data_sbr_all['nama_usaha'].str.contains(search_query, case=False)]
+        else: 
+            data_sbr_table =  data_sbr_all
+
+        for idx in data_sbr_table.index:
             i = i+1
             color_status = "green"
             # if data_merge['b305'][idx] == data_merge['jumlah_art_tani'][idx]:
@@ -113,9 +134,9 @@ with open("css/style.css") as source_des:
             #     status = "Repo berbeda dengan Wilkerstat"
             #     color_status = "red"
             if data_sbr_all['keberadaan_usaha'][idx] > 0 :
-                table_row = table_row + f"<tr><td>{i}</td><td>{data_sbr_all['idsbr'][idx]}</td><td>{data_sbr_all['nama_usaha'][idx]}</td><td>{data_sbr_all['alamat'][idx]}</td><td>{int(data_sbr_all['keberadaan_usaha'][idx])}</td><td>{data_sbr_all['idsbr_master'][idx]}</td><td>{data_sbr_all['sumber_profiling'][idx]}</td><td><span>{data_sbr_all['catatan_profiling'][idx]}</span></td></tr>"
+                table_row = table_row + f"<tr><td>{i}</td><td>{data_sbr_all['idsbr'][idx]}</td><td>{data_sbr_all['nama_usaha'][idx].replace("<","(").replace(">",")")}</td><td>{data_sbr_all['alamat'][idx]}</td><td>{int(data_sbr_all['keberadaan_usaha'][idx])}</td><td>{data_sbr_all['idsbr_master'][idx]}</td><td>{data_sbr_all['sumber_profiling'][idx]}</td><td><span>{data_sbr_all['catatan_profiling'][idx]}</span></td></tr>"
             else : 
-                table_row = table_row + f"<tr><td>{i}</td><td>{data_sbr_all['idsbr'][idx]}</td><td>{data_sbr_all['nama_usaha'][idx]}</td><td>{data_sbr_all['alamat'][idx]}</td><td></td><td>{data_sbr_all['idsbr_master'][idx]}</td><td>{data_sbr_all['sumber_profiling'][idx]}</td><td><span>{data_sbr_all['catatan_profiling'][idx]}</span></td></tr>"
+                table_row = table_row + f"<tr><td>{i}</td><td>{data_sbr_all['idsbr'][idx]}</td><td>{data_sbr_all['nama_usaha'][idx].replace("<","(").replace(">",")")}</td><td>{data_sbr_all['alamat'][idx]}</td><td></td><td>{data_sbr_all['idsbr_master'][idx]}</td><td>{data_sbr_all['sumber_profiling'][idx]}</td><td><span>{data_sbr_all['catatan_profiling'][idx]}</span></td></tr>"
         # st.markdown(table_row)    
         display_tables = f"{display_table}{table_row}</tbody></table>"
         st.markdown(display_tables, unsafe_allow_html=True)
