@@ -91,3 +91,15 @@ with open("css/style.css") as source_des:
     st.subheader("Lain Lain")
     st.text("a. sumber_profiling")
     st.text("b. catatan_profiling")
+
+
+    kode_wilayah = pd.read_excel("data/kode_wilayah.xlsx")
+    usaha = []
+    usaha_titik = []
+    for index, desa in kode_wilayah.iterrows():
+        ds = pd.read_excel("data/desa/"+str(desa['kode'])+".xlsx")
+        usaha.append(len(ds))
+        usaha_titik.append(len(ds[ds['latitude'].notnull()]))
+    kode_wilayah["jumlah_usaha"]=usaha
+    kode_wilayah["jumlah_usaha_dengan_titik"]=usaha_titik
+    kode_wilayah.to_excel("data/jumlah_usaha.xlsx", sheet_name=kode_wilayah["desa"][50], index=False) 

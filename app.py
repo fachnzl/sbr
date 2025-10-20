@@ -28,6 +28,8 @@ with open("css/style.css") as source_des:
 
     read_data = 0
     st.markdown("")
+    col1,col2,col3 = st.columns([1,1,4])
+    col1.link_button("Download Data SBR", "http://s.bps.go.id/dataSBR1174")
     col1,col2,col3 = st.columns([1,1,2])
     filter_kecamatan = col1.selectbox("Kecamatan",['SEMUA']+list(dict.fromkeys(kode_wilayah['kecamatan'])))
     if filter_kecamatan != "SEMUA" :
